@@ -1,24 +1,43 @@
-# Use the official Python 3.13 image from the Docker Hub
-FROM python:3.13
+FROM python:3.13-bookworm
 
-# Set environment variables
 ENV POETRY_VERSION=2.1.2
 
-# Install Poetry
 RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
+    apt-get install -y \
+		build-essential \
+		curl \
+		git \
+		make \
+		gcc \
+		postgresql-client \
+		vim \
+		uuid-runtime \
+		ca-certificates && \
+	update-ca-certificates
+
+RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Set the working directory
-WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# GOOSE DEPEND
+ENV GO_BOOTSTRAP_VERSION=1.21.9
+ENV GO_VERSION=1.22.2
 
-# # Install dependencies
-# RUN poetry install
-#
-# # Command to run your application
-# CMD ["poetry", "run", "python", "your_script.py"]
-#
+RUN curl -LO https://go.dev/dl/go${GO_BOOTSTRAP_VERSION}.linux-amd64.tar.gz && \
+    mkdir /usr/local/go-bootstrap && \
+    tar -C /usr/local/go-bootstrap --strip-components=1 -xzf go${GO_BOOTSTRAP_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_BOOTSTRAP_VERSION}.linux-amd64.tar.gz
+
+ENV GOROOT_BOOTSTRAP=/usr/local/go-bootstrap
+
+RUN curl -LO https://go.dev/dl/go${GO_VERSION}.src.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.src.tar.gz && \
+    rm go${GO_VERSION}.src.tar.gz
+
+RUN cd /usr/local/go/src && ./make.bash
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/go
+ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+RUN rm -rf /usr/local/go-bootstrap
+
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest

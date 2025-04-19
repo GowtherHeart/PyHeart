@@ -1,6 +1,8 @@
 import inspect
 from typing import Any, Sequence
 
+from loguru import logger
+
 from src.pkg.driver.postgres import PostgresDriver
 
 
@@ -101,6 +103,7 @@ def inject(module, driver) -> None:
         if issubclass(v.__bases__[0], Query):
             result.append(v)
 
+    logger.info(f"inject query: {result}")
     for obj in result:
         data = obj.execute.__annotations__
         if "__args__" not in dir(data["return"]):

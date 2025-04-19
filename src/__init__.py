@@ -1,7 +1,8 @@
 import os
 
 from src.cmd import Mapper
-from src.config.app import Config, arg_parser
+from src.config.app import Config, arg_parser, get_config
+from src.pkg.logging._main import LoggingInit
 
 testing = bool(os.getenv("TESTING", False))
 if testing is True:
@@ -17,3 +18,5 @@ else:
     Config(cmd_obj.config_array)  # type: ignore
 
     app = Mapper().MAP[cmd_arg]()
+
+    LoggingInit(lvl=get_config().LOGGING.LVL)

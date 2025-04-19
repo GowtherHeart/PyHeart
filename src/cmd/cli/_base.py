@@ -8,7 +8,7 @@ from src.repository import notes as notes_repo
 
 
 class BaseCliCmd(Cmd):
-    config_array = [ConfigName.CLI, ConfigName.POSTGRES]
+    config_array = [ConfigName.CLI, ConfigName.POSTGRES, ConfigName.LOGGING]
 
     def _prepare(self) -> None:
         make_tx_id()

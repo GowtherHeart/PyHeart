@@ -10,6 +10,7 @@ class ConfigName:
     POSTGRES = "POSTGRES"
     CLI = "CLI"
     REDIS = "REDIS"
+    LOGGING = "LOGGING"
 
 
 class HttpSettings(BaseSettings):
@@ -71,11 +72,24 @@ class RedisSettings(BaseSettings):
     DB: str = Field(validate_default=False)
 
 
+class LoggingSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_nested_delimiter="__",
+        env_file_encoding="utf-8",
+        env_prefix="LOGGING__",
+        extra="ignore",
+    )
+
+    LVL: str = Field(validate_default=False)
+
+
 MAP = {
     ConfigName.POSTGRES: PostgresSettings,
     ConfigName.HTTP: HttpSettings,
     ConfigName.CLI: CliSettings,
     ConfigName.REDIS: RedisSettings,
+    ConfigName.LOGGING: LoggingSettings,
 }
 
 
@@ -94,6 +108,7 @@ class Config(metaclass=Singleton):
     CLI: CliSettings
     POSTGRES: PostgresSettings
     REDIS: RedisSettings
+    LOGGING: LoggingSettings
 
     CMD: str | None = None
     TESTING: bool = False

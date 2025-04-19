@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI, Request
+from loguru import logger
 from starlette.responses import JSONResponse
 
 from src.config.app import ConfigName, get_config
@@ -26,7 +27,12 @@ __all__ = ["HttpCmd"]
 
 class HttpCmd(Cmd):
     name = "Http"
-    config_array = [ConfigName.HTTP, ConfigName.POSTGRES, ConfigName.REDIS]
+    config_array = [
+        ConfigName.HTTP,
+        ConfigName.POSTGRES,
+        ConfigName.REDIS,
+        ConfigName.LOGGING,
+    ]
 
     _app = FastAPI()
 
@@ -85,8 +91,9 @@ class HttpCmd(Cmd):
     @staticmethod
     @_app.on_event("startup")
     async def starup():
-        await _startup_repo.InitConnectionQuery().execute()
-        await core_redis().get("first")
+        with logger.contextualize(request_id="init"):
+            await _startup_repo.InitConnectionQuery().execute()
+            await core_redis().get("first")
         return
 
     def __call__(self) -> FastAPI:
@@ -100,4 +107,5 @@ class HttpCmd(Cmd):
             workers=self._config.HTTP.WORKER,
             factory=True,
             reload=self._config.HTTP.RELOAD,
+            log_config=None,
         )

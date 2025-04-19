@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from functools import wraps
 from typing import Any, AsyncGenerator
 
+from loguru import logger
+
 from src.config.app import get_config
 from src.pkg.context import get_tx_id
 from src.pkg.driver.postgres import PostgresDriver
@@ -38,10 +40,13 @@ def transaction(func):
         try:
             async with driver.pool.acquire() as conn:
                 async with conn.transaction():
+                    logger.debug(f"[tx_decorator] start transaction")
                     driver.conn[get_tx_id()] = conn
                     return await func(*args, **kwargs)
         finally:
-            del driver.conn[get_tx_id()]
+            logger.debug(f"[tx_decorator] remove transaction")
+            if driver.conn.get(get_tx_id()) is not None:
+                del driver.conn[get_tx_id()]
 
     return wrapper
 
@@ -70,9 +75,14 @@ async def tx() -> AsyncGenerator[Any, None]:
 
     else:
         await driver._init_pool()
-        async with driver.pool.acquire() as conn:
-            async with conn.transaction():
-                driver.conn[get_tx_id()] = conn
-                yield conn
+        try:
+            async with driver.pool.acquire() as conn:
+                async with conn.transaction():
+                    logger.debug(f"[tx_contextmanager] start transaction")
+                    driver.conn[get_tx_id()] = conn
+                    yield conn
 
-        del driver.conn[get_tx_id()]
+        finally:
+            logger.debug(f"[tx_contextmanager] remove transaction")
+            if driver.conn.get(get_tx_id()) is not None:
+                del driver.conn[get_tx_id()]

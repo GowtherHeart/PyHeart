@@ -1,0 +1,70 @@
+services:
+  ######################################
+  # HTTP
+  ######################################
+  http:
+    build:
+      context: .
+      dockerfile: ./contrib/docker/app.Dockerfile
+    networks:
+      - pyheart-net
+    env_file: container.env
+    command: poetry run python main.py -c Http
+    profiles: [app]
+    ports:
+      - 8001:8001
+
+  ######################################
+  # SERVICES
+  ######################################
+  postgres:
+    image: postgres:17
+    env_file: .env
+    networks:
+      - pyheart-net
+    command: postgres -c 'max_connections=10000'
+    profiles: [db]
+    environment:
+      - POSTGRES_USER=${PG__USERNAME}
+      - POSTGRES_PASSWORD=${PG__PASSWORD}
+    restart: unless-stopped
+    ports:
+      - 5434:5432
+
+  redis:
+    image: redis:7.4.2
+    env_file: .env
+    networks:
+      - pyheart-net
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS__PASSWORD}
+    profiles: [db]
+    ports:
+      - 6381:6379
+
+  ######################################
+  # DEV TOOLS
+  ######################################
+  pytest:
+    build:
+      context: .
+      dockerfile: ./contrib/docker/pytest.Dockerfile
+    networks:
+      - pyheart-net
+    env_file: container.env
+    command: ./contrib/scripts/pytest.sh
+    profiles: [pytest]
+
+  migration:
+    build:
+      context: .
+      dockerfile: ./contrib/docker/pytest.Dockerfile
+    networks:
+      - pyheart-net
+    env_file: container.env
+    command: ./contrib/scripts/migration.sh
+    profiles: [migration]
+
+
+networks:
+  pyheart-net:

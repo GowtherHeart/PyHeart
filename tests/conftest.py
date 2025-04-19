@@ -1,3 +1,4 @@
+# import sys
 import asyncio
 import os
 from uuid import uuid4
@@ -5,6 +6,10 @@ from uuid import uuid4
 import pytest
 
 os.environ["TESTING"] = "true"
+
+
+# if sys.platform == "linux":
+#     asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 
 @pytest.yield_fixture(scope="session")

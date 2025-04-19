@@ -1,5 +1,8 @@
-FROM base-python
+FROM pyheart-base
 
-RUN poetry install
+WORKDIR /app
+COPY . /app
+
+RUN poetry install --only main
 
 CMD ["poetry", "run", "python", "main.py"]
