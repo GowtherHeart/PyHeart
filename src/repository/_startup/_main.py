@@ -1,9 +1,9 @@
-from src.pkg.driver.query import QueryForceSelect
+from src.pkg.driver.query import QueryExecute
 
 __all__ = ["InitConnectionQuery"]
 
 
-class InitConnectionQuery(QueryForceSelect):
+class InitConnectionQuery(QueryExecute):
     """
     This class is responsible for initializing a connection by executing a simple query.
     It inherits from QueryForceSelect and overrides the execute method to perform the query.

@@ -1,17 +1,22 @@
+from asyncpg import UniqueViolationError
+
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.notes import NotesCustomTyping, NotesTyping
+from src.internal.exception.notes import NoteCreateException
 from src.models.db.notes import NoteCoreModel
-from src.pkg.driver.query import QueryForceSelect, QueryTransactionSelect
+from src.pkg.driver.query import QueryExecute, QueryTxExecute
 
 __all__ = ["CreateQuery", "UpdateQuery", "SelectQuery"]
 
 
-class CreateQuery(QueryTransactionSelect):
+class CreateQuery(QueryTxExecute):
     query = """
         insert into notes(name, content)
         values($1, $2)
         returning id, name, content, date_create, date_update, deleted;
     """
+
+    exception_map = {UniqueViolationError: NoteCreateException}
 
     def __init__(
         self,
@@ -24,7 +29,7 @@ class CreateQuery(QueryTransactionSelect):
         return await super().execute()
 
 
-class UpdateQuery(QueryForceSelect):
+class UpdateQuery(QueryExecute):
     query = """
         update notes set
             content = COALESCE($1, content),
@@ -42,11 +47,11 @@ class UpdateQuery(QueryForceSelect):
     ) -> None:
         super().__init__(content, name, deleted)
 
-    async def execute(self) -> list[NoteCoreModel]:
+    async def execute(self) -> NoteCoreModel:
         return await super().execute()
 
 
-class SelectQuery(QueryForceSelect):
+class SelectQuery(QueryExecute):
     query = """
         select
             n.id as id,

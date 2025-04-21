@@ -36,8 +36,8 @@ class Query:
     model: Any = None
     array: bool = False
     skip: bool = False
-    catch_exception: list[Exception] | None = None
-    return_exception: Exception | None = None
+    exception_map: dict[type[Exception], type[Exception]] | None = None
+    default_exception: type[Exception] | None = None
 
     def __init__(self, *args) -> None:
         self.param = args
@@ -49,12 +49,18 @@ class Query:
         try:
             result = await self._execute()
         except Exception as exc:
-            if self.catch_exception is not None and exc not in self.catch_exception:
-                raise exc
+            if (
+                self.exception_map is not None
+                and (_exc := self.exception_map.get(type(exc), None)) is not None
+            ):
+                raise _exc
 
-            raise self.return_exception or exc
+            if self.default_exception is not None:
+                raise self.default_exception
 
-        if self.skip is True:
+            raise exc
+
+        if self.skip is True or result is None or len(result) == 0:
             return result
 
         if self.array is False:
@@ -63,24 +69,14 @@ class Query:
         return [self.model(**el) for el in result]
 
 
-class QueryForceSelect(Query):
+class QueryExecute(Query):
     async def _execute(self) -> Any:
         return await self.driver.force_select(self.query, *self.param)
 
 
-class QueryTransactionSelect(Query):
+class QueryTxExecute(Query):
     async def _execute(self) -> Any:
         return await self.driver.transaction_select(self.query, *self.param)
-
-
-class QueryTransactionExecute(Query):
-    async def _execute(self) -> Any:
-        return await self.driver.transaction_execute(self.query, *self.param)
-
-
-class QueryForceExecute(Query):
-    async def _execute(self) -> Any:
-        return await self.driver.transaction_execute(self.query, *self.param)
 
 
 def inject(module, driver) -> None:
@@ -108,7 +104,7 @@ def inject(module, driver) -> None:
         data = obj.execute.__annotations__
         if "__args__" not in dir(data["return"]):
             obj.model = data["return"]
-            if data["return"] in (int, str):
+            if data["return"] in (int, str, dict):
                 obj.skip = True
 
             obj.driver = driver

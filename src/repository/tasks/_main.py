@@ -1,12 +1,12 @@
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.tasks import TasksCustomTyping, TasksTyping
 from src.models.db.tasks import TaskCoreModel
-from src.pkg.driver.query import QueryForceSelect, QueryTransactionSelect
+from src.pkg.driver.query import QueryExecute, QueryTxExecute
 
 __all__ = ["CreateQuery", "UpdateQuery", "SelectQuery"]
 
 
-class CreateQuery(QueryTransactionSelect):
+class CreateQuery(QueryTxExecute):
     query = """
         insert into tasks(name, content)
         values($1, $2)
@@ -24,7 +24,7 @@ class CreateQuery(QueryTransactionSelect):
         return await super().execute()
 
 
-class UpdateQuery(QueryForceSelect):
+class UpdateQuery(QueryExecute):
     query = """
         update tasks set
             content = COALESCE($1, content),
@@ -48,7 +48,7 @@ class UpdateQuery(QueryForceSelect):
         return await super().execute()
 
 
-class SelectQuery(QueryForceSelect):
+class SelectQuery(QueryExecute):
     query = """
         select
             t.id as id,

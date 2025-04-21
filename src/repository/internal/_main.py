@@ -4,7 +4,7 @@ from src.entity.db.types.internal import (
     InternalPgTyping,
 )
 from src.models.db.internal import InternalPostgresCoreModel
-from src.pkg.driver.query import QueryForceSelect, QueryTransactionSelect
+from src.pkg.driver.query import QueryExecute, QueryTxExecute
 
 __all__ = [
     "CreateQuery",
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-class CreateQuery(QueryTransactionSelect):
+class CreateQuery(QueryTxExecute):
     query = """
         insert into internal(name, value)
         values($1, $2)
@@ -32,7 +32,7 @@ class CreateQuery(QueryTransactionSelect):
         return await super().execute()
 
 
-class UpdateQuery(QueryForceSelect):
+class UpdateQuery(QueryExecute):
     query = """
         update internal set
             value = COALESCE($1, value)
@@ -52,7 +52,7 @@ class UpdateQuery(QueryForceSelect):
         return await super().execute()
 
 
-class DeleteQuery(QueryForceSelect):
+class DeleteQuery(QueryExecute):
     query = """
         delete from internal where name = $1
         returning id, name, value;
@@ -68,7 +68,7 @@ class DeleteQuery(QueryForceSelect):
         return await super().execute()
 
 
-class SelectQuery(QueryForceSelect):
+class SelectQuery(QueryExecute):
     query = """
         select
             i.id as id,
