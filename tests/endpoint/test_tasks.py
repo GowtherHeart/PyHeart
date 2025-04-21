@@ -15,7 +15,7 @@ async def test_get(task: TaskCoreModel):
         assert response.status_code == status.HTTP_200_OK
 
         body = response.json()
-        assert body[0]["name"] == task.name
+        assert body["payload"][0]["name"] == task.name
 
 
 @pytest.mark.asyncio

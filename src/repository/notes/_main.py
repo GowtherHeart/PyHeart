@@ -47,7 +47,7 @@ class UpdateQuery(QueryExecute):
     ) -> None:
         super().__init__(content, name, deleted)
 
-    async def execute(self) -> NoteCoreModel:
+    async def execute(self) -> list[NoteCoreModel]:
         return await super().execute()
 
 

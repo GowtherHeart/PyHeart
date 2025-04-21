@@ -15,7 +15,7 @@ async def test_get(note: NoteCoreModel):
         assert response.status_code == status.HTTP_200_OK
 
         body = response.json()
-        assert body[0]["name"] == note.name
+        assert body["payload"][0]["name"] == note.name
 
 
 @pytest.mark.asyncio
@@ -40,7 +40,7 @@ async def test_delete_note():
         assert create_response.status_code == status.HTTP_201_CREATED
 
         delete_response = await client.delete(
-            f"/v1/notes/", params={"name": create_response.json()["name"]}
+            f"/v1/notes/", params={"name": create_response.json()["payload"]["name"]}
         )
         assert delete_response.status_code == status.HTTP_200_OK
 
@@ -57,7 +57,7 @@ async def test_patch_note():
 
         patch_data = {
             "content": "updated content",
-            "name": create_response.json()["name"],
+            "name": create_response.json()["payload"]["name"],
         }
         patch_response = await client.patch(
             f"/v1/notes/", content=json.dumps(patch_data)
@@ -66,4 +66,4 @@ async def test_patch_note():
 
         get_response = await client.get(f"/v1/notes/", params={"name": data["name"]})
         assert get_response.status_code == status.HTTP_200_OK
-        assert get_response.json()[0]["content"] == patch_data["content"]
+        assert get_response.json()["payload"][0]["content"] == patch_data["content"]
