@@ -2,6 +2,7 @@ from starlette import status
 
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.tasks import TasksCustomTyping, TasksTyping
+from src.internal.fastapi.controller import HttpController
 from src.models.request.tasks import (
     TasksCreatePldModel,
     TasksDeletePrmModel,
@@ -9,7 +10,7 @@ from src.models.request.tasks import (
     TasksUpdatePldModel,
 )
 from src.models.response.tasks import TasksCoreRespModel
-from src.pkg.abc.controller import HttpController, router
+from src.pkg.abc.controller import router
 from src.usecase.tasks import TasksV1US
 
 

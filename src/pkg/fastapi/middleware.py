@@ -1,6 +1,7 @@
 from time import time
 
 from fastapi import Request, Response
+from fastapi.responses import JSONResponse
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -55,6 +56,16 @@ class MasterMiddelware(BaseHTTPMiddleware):
                 )
                 response = await call_next(request)
                 return response
+
+            except Exception:
+                _result = {
+                    "exception": {
+                        "message": "",
+                    },
+                    "status_code": 500,
+                    "payload": None,
+                }
+                return JSONResponse(_result, status_code=500)
 
             finally:
                 time_diff = time() - start

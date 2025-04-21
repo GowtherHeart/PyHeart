@@ -2,6 +2,7 @@ from starlette import status
 
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.notes import NotesCustomTyping, NotesTyping
+from src.internal.fastapi.controller import HttpController
 from src.models.request.notes import (
     NotesCreatePldModel,
     NotesDeletePrmModel,
@@ -9,7 +10,7 @@ from src.models.request.notes import (
     NotesUpdatePldModel,
 )
 from src.models.response.notes import NotesCoreRespModel
-from src.pkg.abc.controller import HttpController, router
+from src.pkg.abc.controller import router
 from src.usecase.notes import NotesV1US
 
 

@@ -4,7 +4,9 @@ import types
 from enum import Enum
 from typing import Sequence
 
-from fastapi import APIRouter, params
+from fastapi import APIRouter, Response, params
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 
 
 class Singleton(type):
@@ -37,6 +39,7 @@ def router(
     description: str | None = None,
     response_description: str | None = None,
     deprecated: bool | None = None,
+    response_class: type[Response] | None = None,
     responses=None,
 ):
     """
@@ -68,6 +71,7 @@ def router(
             "response_description": response_description,
             "deprecated": deprecated,
             "responses": responses,
+            "response_class": response_class,
         }
         wrapper.core_func = func  # type: ignore
         return wrapper
@@ -86,11 +90,22 @@ class HttpController(Controller, metaclass=Singleton):
     tags: list[str | Enum] | None = None
     dependencies: list[params.Depends] | None = None
     deprecated: bool | None = None
+    response_class: type[Response] | None = None
+    route_class: type[APIRoute] | None = None
 
     def __build(self, method: str) -> None:
         func = getattr(self, method)
         data = func.data.copy()
         setattr(self, method, types.MethodType(func.core_func, self))
+
+        _response_class: type[Response]
+        if data["response_class"] is not None:
+            _response_class = data["response_class"]
+        elif self.response_class is not None:
+            _response_class = self.response_class
+        else:
+            _response_class = JSONResponse
+
         self.router.add_api_route(
             path=data["path"],
             endpoint=getattr(self, method),
@@ -101,6 +116,7 @@ class HttpController(Controller, metaclass=Singleton):
             deprecated=data["deprecated"],
             responses=data["responses"],
             methods=[method.upper()],
+            response_class=_response_class,
         )
 
     def __init__(self) -> None:
@@ -109,6 +125,7 @@ class HttpController(Controller, metaclass=Singleton):
             tags=self.tags,
             dependencies=self.dependencies,
             deprecated=self.deprecated,
+            route_class=self.route_class if self.route_class is not None else APIRoute,
         )
 
         _method = type(self).get

@@ -86,7 +86,18 @@ class HttpCmd(Cmd):
         request: Request, exc: CoreException
     ) -> JSONResponse:
         _ = request
-        return JSONResponse(exc.detail, status_code=exc.status_code)
+        result = {
+            "exception": {
+                "message": exc.detail,
+            },
+            "status_code": exc.status_code,
+            "payload": None,
+        }
+
+        return JSONResponse(
+            result,
+            status_code=exc.status_code,
+        )
 
     @staticmethod
     @_app.on_event("startup")

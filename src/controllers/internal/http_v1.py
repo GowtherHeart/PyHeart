@@ -5,6 +5,7 @@ from src.entity.db.types.internal import (
     InternalPgCustomTyping,
     InternalPgTyping,
 )
+from src.internal.fastapi.controller import HttpController
 from src.models.request.internal import (
     PgCreatePldModel,
     PgDeletePrmModel,
@@ -12,7 +13,7 @@ from src.models.request.internal import (
     PgPrmModel,
 )
 from src.models.response.internal import InternalPgCoreRespModel
-from src.pkg.abc.controller import HttpController, router
+from src.pkg.abc.controller import router
 from src.usecase.internal import InternalPgV1US
 
 
