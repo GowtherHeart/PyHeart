@@ -2,7 +2,7 @@ import os
 
 from src.cmd import Mapper
 from src.config.app import Config, arg_parser, get_config
-from src.pkg.logging._main import LoggingInit
+from src.pkg.logging import LoggingInit
 
 testing = bool(os.getenv("TESTING", False))
 if testing is True:
