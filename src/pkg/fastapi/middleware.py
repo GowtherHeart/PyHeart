@@ -28,7 +28,7 @@ def RequestLogger(
         _message += f", Status-Code: {status_code}"
 
     if content is not None:
-        _message += f", Content: {content}"
+        _message += f", Content: {content!r}"
 
     logger.opt(depth=1).info(_message)
 
