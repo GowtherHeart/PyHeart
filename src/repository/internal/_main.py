@@ -44,7 +44,7 @@ class UpdateQuery(QueryExecute):
     def __init__(
         self,
         name: InternalPgCustomTyping.name = None,
-        value: InternalPgTyping.value = None,
+        value: InternalPgCustomTyping.value = None,
     ) -> None:
         super().__init__(value, name)
 

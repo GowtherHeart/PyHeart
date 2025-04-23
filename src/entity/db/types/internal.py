@@ -6,3 +6,4 @@ class InternalPgTyping:
 
 class InternalPgCustomTyping:
     type name = InternalPgTyping.name | None
+    type value = InternalPgTyping.value | None
