@@ -16,3 +16,23 @@ class CoreException(HTTPException):
 
     def __init__(self) -> None:
         super().__init__(status_code=self.status_code, detail=self.detail)
+
+    @classmethod
+    def generate_openapi(cls):
+        """Generate OpenAPI documentation for this exception class."""
+        return {
+            cls.status_code: {
+                "description": cls.detail,
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "exception": {
+                                "message": cls.detail,
+                            },
+                            "status_code": cls.status_code,
+                            "payload": None,
+                        }
+                    },
+                },
+            },
+        }

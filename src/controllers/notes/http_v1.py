@@ -25,7 +25,27 @@ class NotesCoreControllerV1(HttpController):
     prefix = "/notes"
     tags = ["notes"]
 
-    @router(path="/", status_code=status.HTTP_200_OK)
+    @router(
+        path="/",
+        status_code=status.HTTP_200_OK,
+        # responses={
+        #     200: {
+        #         "content": {
+        #             "application/json": {
+        #                 # "example": NotesCoreRespModel.model_json_schema(),
+        #                 "example": NotesCoreRespModel(
+        #                     deleted=False,
+        #                     date_update="2025-01-01",
+        #                     date_create="2025-01-01",
+        #                     content="",
+        #                     name="asdf",
+        #                 ),
+        #             }
+        #         }
+        #     }
+        # },
+        # response_model=NotesCoreRespModel,
+    )
     async def get(
         self,
         name: NotesCustomTyping.name = None,

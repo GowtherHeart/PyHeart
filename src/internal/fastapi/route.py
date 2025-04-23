@@ -8,7 +8,7 @@ from pydantic import BaseModel
 T = TypeVar("T")
 
 
-class DefaultResponseModel(BaseModel, Generic[T]):
+class MasterResponseModel(BaseModel, Generic[T]):
     payload: T | None = None
     status_code: int = 200
     exception: dict | None = None
@@ -20,7 +20,7 @@ class MasterRoute(APIRoute):
 
         async def custom_handler(request):
             response = await original_handler(request)
-            wrapped = DefaultResponseModel(
+            wrapped = MasterResponseModel(
                 payload=response.custom_content,  # type: ignore
                 status_code=response.status_code,
                 exception={},

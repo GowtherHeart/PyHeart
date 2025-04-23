@@ -86,16 +86,14 @@ class HttpCmd(Cmd):
         request: Request, exc: CoreException
     ) -> JSONResponse:
         _ = request
-        result = {
-            "exception": {
-                "message": exc.detail,
-            },
-            "status_code": exc.status_code,
-            "payload": None,
-        }
-
         return JSONResponse(
-            result,
+            {
+                "exception": {
+                    "message": exc.detail,
+                },
+                "status_code": exc.status_code,
+                "payload": None,
+            },
             status_code=exc.status_code,
         )
 
