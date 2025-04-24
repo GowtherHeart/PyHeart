@@ -1,9 +1,9 @@
 [project]
-name = "PyArch"
+name = "PyHeart"
 version = "0.1.0"
-description = ""
+description = "PyHeart"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Gowther Heart",email = "heartgowther@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -60,7 +60,7 @@ ignore_missing_imports = true
 
 [tool.pyright]
 exclude = [
-	"**/node_modules",
+		"**/node_modules",
     "**/__pycache__",
     "src/experimental",
     "src/typestubs",
