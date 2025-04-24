@@ -55,6 +55,7 @@ class Query:
             ):
                 raise _exc
 
+            logger.exception(f"[postgres] {exc}")
             if self.default_exception is not None:
                 raise self.default_exception
 

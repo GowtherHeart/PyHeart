@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
 import redis.asyncio as aioredis
+from loguru import logger
 
 __all__ = ["RedisDriver"]
 
@@ -64,6 +65,9 @@ class RedisDriver(metaclass=_Singleton):
 
         try:
             yield self._connector
+        except Exception as exc:
+            logger.exception(f"[redis] {exc}")
+            raise exc
         finally:
             await self._connector.close()
 
