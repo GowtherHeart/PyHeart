@@ -32,6 +32,9 @@ class Controller:
 class EndpointException(Exception): ...
 
 
+class DocsInitException(Exception): ...
+
+
 def router(
     path: str,
     status_code: int,
@@ -41,6 +44,7 @@ def router(
     deprecated: bool | None = None,
     response_class: type[Response] | None = None,
     responses=None,
+    response_model=None,
 ):
     """
     Decorator to define a route for an HTTP endpoint in a FastAPI application.
@@ -70,8 +74,9 @@ def router(
             "description": description,
             "response_description": response_description,
             "deprecated": deprecated,
-            "responses": responses,
+            "responses": responses if responses is not None else {},
             "response_class": response_class,
+            "response_model": response_model,
         }
         wrapper.core_func = func  # type: ignore
         return wrapper
@@ -106,6 +111,30 @@ class HttpController(Controller, metaclass=Singleton):
         else:
             _response_class = JSONResponse
 
+        _responses = data["responses"].copy()
+        if (
+            data["response_model"] is not None
+            and self.route_class is not None
+            and "local_response_model_field_map" in self.route_class.__dict__
+        ):
+            field_map = {}
+            for k, v in self.route_class.local_response_model_field_map.items():  # type: ignore
+                _v = data.get(v, None)
+                if _v is None:
+                    raise DocsInitException()
+
+                field_map[k] = _v
+
+            _responses[data["status_code"]] = {
+                "content": {
+                    "application/json": {
+                        "example": self.route_class.local_response_model(  # type: ignore
+                            **field_map
+                        )
+                    }
+                }
+            }
+
         self.router.add_api_route(
             path=data["path"],
             endpoint=getattr(self, method),
@@ -114,7 +143,7 @@ class HttpController(Controller, metaclass=Singleton):
             description=data["description"],
             response_description=data["response_description"],
             deprecated=data["deprecated"],
-            responses=data["responses"],
+            responses=_responses,
             methods=[method.upper()],
             response_class=_response_class,
         )

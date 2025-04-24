@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI, Request
+from fastapi.openapi.utils import get_openapi
 from loguru import logger
 from starlette.responses import JSONResponse
 
@@ -34,13 +35,33 @@ class HttpCmd(Cmd):
         ConfigName.LOGGING,
     ]
 
-    _app = FastAPI()
+    _app = FastAPI(
+        swagger_ui_parameters={
+            "defaultModelsExpandDepth": -1,
+            "syntaxHighlight": {"theme": "tomorrow-night"},
+        }
+    )
+
+    def custom_openapi(self):
+        if self._app.openapi_schema:
+            return self._app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title="PyHeart",
+            version="1.0.0",
+            description="",
+            routes=self._app.routes,
+        )
+
+        self._app.openapi_schema = openapi_schema
+        return self._app.openapi_schema
 
     def __init__(self) -> None:
         self._config = get_config()
         self._app.add_middleware(MasterMiddelware)
         self._init_repo()
         self.__reg_controller_v1()
+        self._app.openapi = self.custom_openapi
 
     def _init_repo(self) -> None:
         driver = PostgresDriver(
