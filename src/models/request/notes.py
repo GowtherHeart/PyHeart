@@ -2,10 +2,10 @@ from src.entity.db.core import CoreEntity
 from src.entity.db.notes import NotesCustomEntity, NotesEntity
 from src.pkg.abc.model import ParamsModel, PayloadModel
 
-__all__ = ["NotesCreatePldModel", "NotesUpdatePldModel", "NotesGetPrmModel"]
+__all__ = ["CreatePldModel", "UpdatePldModel", "GetPrmModel"]
 
 
-class NotesGetPrmModel(
+class GetPrmModel(
     ParamsModel,
     NotesCustomEntity.name_op,
     NotesCustomEntity.date_create_op,
@@ -19,7 +19,7 @@ class NotesGetPrmModel(
     """
 
 
-class NotesDeletePrmModel(
+class DeletePrmModel(
     ParamsModel,
     NotesEntity.name,
 ):
@@ -30,7 +30,7 @@ class NotesDeletePrmModel(
     """
 
 
-class NotesCreatePldModel(
+class CreatePldModel(
     PayloadModel,
     NotesEntity.name,
     NotesEntity.content,
@@ -41,7 +41,7 @@ class NotesCreatePldModel(
     """
 
 
-class NotesUpdatePldModel(
+class UpdatePldModel(
     PayloadModel,
     NotesEntity.name,
     NotesEntity.content,

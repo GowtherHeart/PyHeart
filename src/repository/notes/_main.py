@@ -2,7 +2,7 @@ from asyncpg import UniqueViolationError
 
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.notes import NotesCustomTyping, NotesTyping
-from src.internal.exception.notes import NoteCreateException
+from src.internal.exception.notes import NoteCreateException, NoteUpdateException
 from src.models.db.notes import NoteCoreModel
 from src.pkg.driver.query import QueryExecute, QueryTxExecute
 
@@ -38,6 +38,7 @@ class UpdateQuery(QueryExecute):
             and name = $2
         returning id, name, content, date_create, date_update, deleted;
     """
+    exception_map = {UniqueViolationError: NoteUpdateException}
 
     def __init__(
         self,

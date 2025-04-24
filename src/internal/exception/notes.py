@@ -1,5 +1,7 @@
 from src.pkg.core.exception import CoreException
 
+__all__ = ["NoteCreateException", "NoteUpdateException"]
+
 
 class NoteCreateException(CoreException):
     status_code = 400

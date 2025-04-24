@@ -2,10 +2,10 @@ from src.entity.db.core import CoreEntity
 from src.entity.db.tasks import TasksCustomEntity, TasksEntity
 from src.pkg.abc.model import ParamsModel, PayloadModel
 
-__all__ = ["TasksCreatePldModel", "TasksUpdatePldModel", "TasksGetPrmModel"]
+__all__ = ["CreatePldModel", "UpdatePldModel", "GetPrmModel"]
 
 
-class TasksGetPrmModel(
+class GetPrmModel(
     ParamsModel,
     TasksCustomEntity.name_op,
     TasksCustomEntity.date_create_op,
@@ -17,7 +17,7 @@ class TasksGetPrmModel(
     """
 
 
-class TasksDeletePrmModel(
+class DeletePrmModel(
     ParamsModel,
     TasksEntity.name,
 ):
@@ -26,7 +26,7 @@ class TasksDeletePrmModel(
     """
 
 
-class TasksCreatePldModel(
+class CreatePldModel(
     PayloadModel,
     TasksEntity.name,
     TasksEntity.content,
@@ -36,7 +36,7 @@ class TasksCreatePldModel(
     """
 
 
-class TasksUpdatePldModel(
+class UpdatePldModel(
     PayloadModel,
     TasksEntity.name,
     TasksEntity.content,

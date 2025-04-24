@@ -3,12 +3,7 @@ from starlette import status
 from src.entity.db.types.core import CoreTyping
 from src.entity.db.types.notes import NotesCustomTyping, NotesTyping
 from src.internal.fastapi.controller import HttpController
-from src.models.request.notes import (
-    NotesCreatePldModel,
-    NotesDeletePrmModel,
-    NotesGetPrmModel,
-    NotesUpdatePldModel,
-)
+from src.models.request import notes as note_req
 from src.models.response.notes import NotesCoreRespModel
 from src.pkg.abc.controller import router
 from src.usecase.notes import NotesV1US
@@ -63,7 +58,7 @@ class NotesCoreControllerV1(HttpController):
         Returns:
         A list of NotesCoreResponseModel instances matching the filters.
         """
-        model = NotesGetPrmModel(
+        model = note_req.GetPrmModel(
             name=name,
             date_create=date_create,
             limit=limit,
@@ -73,7 +68,7 @@ class NotesCoreControllerV1(HttpController):
         return [NotesCoreRespModel(**e.model_dump()) for e in result]
 
     @router(path="/", status_code=status.HTTP_201_CREATED)
-    async def post(self, payload: NotesCreatePldModel) -> NotesCoreRespModel:
+    async def post(self, payload: note_req.CreatePldModel) -> NotesCoreRespModel:
         """
         Create a new note with the provided payload.
 
@@ -87,7 +82,7 @@ class NotesCoreControllerV1(HttpController):
         return NotesCoreRespModel(**result.model_dump())
 
     @router(path="/", status_code=status.HTTP_200_OK)
-    async def patch(self, payload: NotesUpdatePldModel) -> list[NotesCoreRespModel]:
+    async def patch(self, payload: note_req.UpdatePldModel) -> NotesCoreRespModel:
         """
         Update an existing note with the provided payload.
 
@@ -98,11 +93,10 @@ class NotesCoreControllerV1(HttpController):
         A NotesCoreResponseModel instance representing the updated note.
         """
         result = await NotesV1US().update(payload=payload)
-        # return NotesCoreResponseModel(**result.model_dump())
-        return [NotesCoreRespModel(**e.model_dump()) for e in result]
+        return NotesCoreRespModel(**result.model_dump())
 
     @router(path="/", status_code=status.HTTP_200_OK)
-    async def delete(self, name: NotesTyping.name) -> list[NotesCoreRespModel]:
+    async def delete(self, name: NotesTyping.name) -> NotesCoreRespModel:
         """
         Delete an existing note by its name.
 
@@ -112,7 +106,6 @@ class NotesCoreControllerV1(HttpController):
         Returns:
         A NotesCoreResponseModel instance representing the deleted note.
         """
-        model = NotesDeletePrmModel(name=name)
+        model = note_req.DeletePrmModel(name=name)
         result = await NotesV1US().delete(model=model)
-        # return NotesCoreResponseModel(**result.model_dump())
-        return [NotesCoreRespModel(**e.model_dump()) for e in result]
+        return NotesCoreRespModel(**result.model_dump())
