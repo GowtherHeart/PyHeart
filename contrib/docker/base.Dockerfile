@@ -5,6 +5,11 @@ ENV POETRY_VERSION=2.1.2
 RUN apt-get update && \
     apt-get install -y \
 		build-essential \
+		gettext \
+		netcat-traditional \
+		util-linux \
+		libmount-dev \
+		libblkid-dev \
 		curl \
 		git \
 		make \
@@ -13,10 +18,8 @@ RUN apt-get update && \
 		vim \
 		uuid-runtime \
 		ca-certificates && \
-	update-ca-certificates
-
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+	update-ca-certificates && \
+	curl -sSL https://install.python-poetry.org | python3 - && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
 
 # GOOSE DEPEND
@@ -32,12 +35,10 @@ ENV GOROOT_BOOTSTRAP=/usr/local/go-bootstrap
 
 RUN curl -LO https://go.dev/dl/go${GO_VERSION}.src.tar.gz && \
     tar -C /usr/local -xzf go${GO_VERSION}.src.tar.gz && \
-    rm go${GO_VERSION}.src.tar.gz
+    rm go${GO_VERSION}.src.tar.gz && \
+	cd /usr/local/go/src && ./make.bash
 
-RUN cd /usr/local/go/src && ./make.bash
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
 ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-RUN rm -rf /usr/local/go-bootstrap
-
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+RUN rm -rf /usr/local/go-bootstrap && go install github.com/pressly/goose/v3/cmd/goose@latest

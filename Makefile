@@ -39,3 +39,34 @@ flake8:
 ## Check typing
 mypy:
 	mypy ${files_to_check}
+
+
+## BUILD IMAGES
+build_base_img:
+	docker build -f contrib/docker/base.Dockerfile -t pyheart-base .
+
+build_app_img:
+	docker build -f contrib/docker/app.Dockerfile -t pyheart-app .
+
+build_pytest_img:
+	docker build -f contrib/docker/pytest.Dockerfile -t pyheart-pytest .
+
+
+## COMPOSE
+compose_up_db:
+	docker compose --profile db up -d --build
+
+compose_down_db:
+	docker compose --profile db down
+
+compose_up_app:
+	docker compose --profile app up -d --build
+
+compose_down_app:
+	docker compose --profile app down
+
+compose_up_pytest:
+	docker compose --profile pytest up --build
+
+compose_down_pytest:
+	docker compose --profile pytest down
