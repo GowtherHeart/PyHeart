@@ -77,6 +77,7 @@ def router(
             "responses": responses if responses is not None else {},
             "response_class": response_class,
             "response_model": response_model,
+            "func_name": func.__name__,
         }
         wrapper.core_func = func  # type: ignore
         return wrapper
@@ -98,7 +99,9 @@ class HttpController(Controller, metaclass=Singleton):
     response_class: type[Response] | None = None
     route_class: type[APIRoute] | None = None
 
-    def __build(self, method: str) -> None:
+    spec_route: list | None = None
+
+    def __build(self, method: str, spec: bool | None = None) -> None:
         func = getattr(self, method)
         data = func.data.copy()
         setattr(self, method, types.MethodType(func.core_func, self))
@@ -135,6 +138,11 @@ class HttpController(Controller, metaclass=Singleton):
                 }
             }
 
+        if spec is True:
+            _http_method = method.split("_")[0]
+        else:
+            _http_method = method
+
         self.router.add_api_route(
             path=data["path"],
             endpoint=getattr(self, method),
@@ -144,7 +152,7 @@ class HttpController(Controller, metaclass=Singleton):
             response_description=data["response_description"],
             deprecated=data["deprecated"],
             responses=_responses,
-            methods=[method.upper()],
+            methods=[_http_method.upper()],
             response_class=_response_class,
         )
 
@@ -176,6 +184,10 @@ class HttpController(Controller, metaclass=Singleton):
         _method = type(self).patch
         if _method is not HttpController.patch:
             self.__build(method="patch")
+
+        if self.spec_route is not None:
+            for _route in self.spec_route:
+                self.__build(method=_route, spec=True)
 
     async def get(self):
         raise EndpointException()

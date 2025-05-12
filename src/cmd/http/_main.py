@@ -130,6 +130,12 @@ class HttpCmd(Cmd):
         return self._app
 
     def run(self) -> None:
+        with logger.contextualize(request_id="init"):
+            logger.info(
+                f"Server running: {self._config.HTTP.HOST}:{self._config.HTTP.PORT}, "
+                f"workers: {self._config.HTTP.WORKER}, "
+                f"reload: {self._config.HTTP.RELOAD}"
+            )
         uvicorn.run(
             "main:app",
             host=self._config.HTTP.HOST,

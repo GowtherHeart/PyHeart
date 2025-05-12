@@ -24,6 +24,8 @@ class NotesCoreControllerV1(HttpController):
     prefix = "/notes"
     tags = ["notes"]
 
+    spec_route = ["post_test"]
+
     @router(
         path="/",
         status_code=status.HTTP_200_OK,
@@ -118,3 +120,10 @@ class NotesCoreControllerV1(HttpController):
         model = note_req.DeletePrmModel(name=name)
         result = await NotesV1US().delete(model=model)
         return NotesCoreRespModel(**result.model_dump())
+
+    @router(
+        path="/test",
+        status_code=status.HTTP_200_OK,
+    )
+    async def post_test(self) -> str:
+        return "TEST!"
