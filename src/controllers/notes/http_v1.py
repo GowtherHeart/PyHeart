@@ -14,11 +14,32 @@ from ._examples import NoteCoreResponseModelArrayExample, NoteCoreResponseModelE
 
 
 class NotesCoreControllerV1(HttpController):
-    """
-    NotesCoreControllerV1 is responsible for handling HTTP requests related to notes.
-    It provides endpoints for creating, retrieving, updating, and deleting notes.
-    The controller uses NotesV1US use case to perform operations and returns responses
-    in the form of NotesCoreResponseModel.
+    """HTTP API controller for notes management (version 1).
+
+    This controller provides RESTful endpoints for complete notes management including
+    creation, retrieval, updating, and deletion operations. It follows REST conventions
+    and integrates with the NotesV1US use case for business logic execution.
+
+    The controller handles:
+    - GET /notes/ - Retrieve notes with optional filtering and pagination
+    - POST /notes/ - Create new notes
+    - PUT /notes/{id} - Update existing notes
+    - DELETE /notes/{id} - Delete notes
+
+    All endpoints return standardized responses using NotesCoreRespModel and handle
+    appropriate HTTP status codes and error conditions.
+
+    Attributes:
+        prefix (str): URL prefix for all note endpoints ('/notes')
+        tags (list[str]): OpenAPI tags for documentation grouping
+
+    Examples:
+        # The controller is automatically registered with FastAPI
+        # Endpoints are available at:
+        # GET /v1/notes/?limit=10&offset=0
+        # POST /v1/notes/ with JSON payload
+        # PUT /v1/notes/123 with JSON payload
+        # DELETE /v1/notes/123
     """
 
     prefix = "/notes"

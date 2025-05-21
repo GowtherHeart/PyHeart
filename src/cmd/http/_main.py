@@ -27,6 +27,41 @@ __all__ = ["HttpCmd"]
 
 
 class HttpCmd(Cmd):
+    """HTTP server command for running the FastAPI web application.
+
+    This command initializes and runs the complete web server with all necessary
+    components including database connections, Redis cache, middleware, controllers,
+    and API documentation. It serves as the main entry point for the web application.
+
+    The command sets up:
+    - FastAPI application with custom OpenAPI documentation
+    - Database connection pools (PostgreSQL)
+    - Redis cache connections
+    - HTTP middleware stack
+    - API route registration for all controllers
+    - Exception handlers
+    - Startup initialization procedures
+
+    Configuration Dependencies:
+    - HTTP: Server host, port, worker configuration
+    - POSTGRES: Database connection parameters
+    - REDIS: Cache connection parameters
+    - LOGGING: Application logging configuration
+
+    Attributes:
+        name (str): Command identifier "Http"
+        config_array (list[str]): Required configuration sections
+        _app (FastAPI): The FastAPI application instance
+
+    Examples:
+        # The command is typically run via the main application:
+        # python main.py --cmd Http
+
+        # Or programmatically:
+        cmd = HttpCmd()
+        cmd.run()
+    """
+
     name = "Http"
     config_array = [
         ConfigName.HTTP,
@@ -61,7 +96,7 @@ class HttpCmd(Cmd):
         self._app.add_middleware(MasterMiddelware)
         self._init_repo()
         self.__reg_controller_v1()
-        self._app.openapi = self.custom_openapi
+        setattr(self._app, "openapi", self.custom_openapi)
 
     def _init_repo(self) -> None:
         driver = PostgresDriver(
