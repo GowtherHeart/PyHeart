@@ -12,8 +12,4 @@ class NotesCoreRespModel(
     NotesEntity.date_update,
     NotesEntity.deleted,
 ):
-    """A response model for notes that includes fields from both the ResponseModel and NotesEntity.
-
-    This model aggregates various attributes from the NotesEntity such as name, content, date of creation,
-    date of update, and deletion status, providing a comprehensive response structure for note-related operations.
-    """
+    """Response model for notes."""

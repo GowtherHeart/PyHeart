@@ -12,18 +12,14 @@ class GetPrmModel(
     CoreEntity.limit,
     CoreEntity.offset,
 ):
-    """
-    A model for retrieving task parameters, including operations on task name and creation date.
-    """
+    """Parameters model for retrieving tasks with filters."""
 
 
 class DeletePrmModel(
     ParamsModel,
     TasksEntity.name,
 ):
-    """
-    A model for deleting task parameters, specifically focusing on the task name.
-    """
+    """Parameters model for deleting tasks."""
 
 
 class CreatePldModel(
@@ -31,9 +27,7 @@ class CreatePldModel(
     TasksEntity.name,
     TasksEntity.content,
 ):
-    """
-    A model for creating a task payload, including task name and content.
-    """
+    """Payload model for creating a new task."""
 
 
 class UpdatePldModel(
@@ -42,6 +36,4 @@ class UpdatePldModel(
     TasksEntity.content,
     TasksEntity.complete,
 ):
-    """
-    A model for updating a task payload, including task name, content, and completion status.
-    """
+    """Payload model for updating an existing task."""

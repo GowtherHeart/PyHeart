@@ -7,65 +7,10 @@ from src.repository import notes as note_repo
 
 
 class NotesV1US(Usecase):
-    """Use case class for notes business logic operations (version 1).
-
-    This class implements the business logic layer for notes management, providing
-    methods for all CRUD operations while handling transaction management and
-    business rules. It serves as the intermediary between controllers and
-    repository layers.
-
-    The use case handles:
-    - Note retrieval with filtering and pagination
-    - Note creation with validation
-    - Note updates with existence checks
-    - Note deletion (soft delete) with validation
-
-    All write operations are wrapped in database transactions to ensure
-    data consistency and atomicity.
-
-    Methods:
-        get: Retrieve notes with optional filtering
-        create: Create new notes
-        update: Update existing notes
-        delete: Soft delete notes
-
-    Examples:
-        usecase = NotesV1US()
-
-        # Get notes with filtering
-        notes = await usecase.get(GetPrmModel(limit=10, offset=0))
-
-        # Create a new note
-        note = await usecase.create(CreatePldModel(name="Title", content="Body"))
-
-        # Update existing note
-        updated = await usecase.update(UpdatePldModel(name="New Title", content="New Body"))
-
-        # Delete note (soft delete)
-        deleted = await usecase.delete(DeletePrmModel(name="Title"))
-    """
+    """Use case class for notes business logic operations (version 1)."""
 
     async def get(self, model: note_req.GetPrmModel) -> list[NoteCoreModel]:
-        """Retrieve notes with optional filtering and pagination.
-
-        Args:
-            model (note_req.GetPrmModel): Request parameters containing optional
-                                        filters (name, date_create) and pagination
-                                        (limit, offset)
-
-        Returns:
-            list[NoteCoreModel]: List of notes matching the filter criteria
-
-        Examples:
-            # Get all notes
-            notes = await usecase.get(GetPrmModel())
-
-            # Get notes with pagination
-            notes = await usecase.get(GetPrmModel(limit=10, offset=20))
-
-            # Get notes with name filter
-            notes = await usecase.get(GetPrmModel(name="My Note"))
-        """
+        """Retrieve notes with optional filtering and pagination."""
         return await note_repo.SelectQuery(
             name=model.name,
             date_create=model.date_create,

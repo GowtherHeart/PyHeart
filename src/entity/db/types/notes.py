@@ -2,9 +2,7 @@ from datetime import datetime
 
 
 class NotesTyping:
-    """
-    A class to represent the typing annotations for a Note entity.
-    """
+    """Type annotations for Note entity fields."""
 
     type id = int
     type name = str
@@ -15,9 +13,7 @@ class NotesTyping:
 
 
 class NotesCustomTyping:
-    """
-    A class to represent custom typing annotations for a Note entity.
-    """
+    """Custom type annotations for optional Note entity fields."""
 
     type name = NotesTyping.name | None
     type date_create = NotesTyping.date_create | None

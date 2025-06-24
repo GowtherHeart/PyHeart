@@ -13,4 +13,4 @@ class NoteCoreModel(
     NotesEntity.date_update,
     NotesEntity.deleted,
 ):
-    """A core model for notes that integrates database model functionalities with note-specific attributes."""
+    """Core database model for notes."""

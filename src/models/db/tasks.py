@@ -14,8 +14,4 @@ class TaskCoreModel(
     TasksEntity.date_update,
     TasksEntity.deleted,
 ):
-    """
-    TaskCoreModel is a database model that represents the core attributes of a task.
-    It inherits from DbModel and includes fields from TasksEntity such as id, name,
-    content, complete status, creation date, update date, and deletion status.
-    """
+    """Core database model for tasks."""

@@ -6,12 +6,7 @@ from .types.tasks import TasksCustomTyping, TasksTyping
 
 
 class TasksEntity(Entity):
-    """
-    Represents a task entity with various fields such as id, name, content,
-    completion status, creation date, update date, and deletion status.
-    Each field is defined as a subclass of FieldEntity, ensuring type safety
-    and validation using Pydantic's Field.
-    """
+    """Database entity representing tasks with all core fields."""
 
     class id(FieldEntity):
         id: TasksTyping.id = Field(...)
@@ -36,12 +31,7 @@ class TasksEntity(Entity):
 
 
 class TasksCustomEntity(Entity):
-    """
-    Represents a custom task entity with optional fields for name and creation date.
-    Each field is defined as a subclass of FieldEntity, allowing for type safety
-    and validation using Pydantic's Field. This class is designed for scenarios
-    where only a subset of task attributes are required.
-    """
+    """Custom database entity for optional task fields and operations."""
 
     class name_op(FieldEntity):
         name: TasksCustomTyping.name = Field(None)

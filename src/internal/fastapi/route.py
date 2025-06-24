@@ -6,15 +6,7 @@ from .model import MasterResponseModel
 
 
 class MasterRoute(APIRoute):
-    """
-    A custom route class that extends FastAPI's APIRoute to wrap responses in a MasterResponseModel.
-
-    This class overrides the default route handler to ensure that all responses are encapsulated
-    within a standardized response model, which includes the payload, status code, and any exception details.
-
-    Methods:
-        get_route_handler: Returns a custom route handler that wraps the response in a MasterResponseModel.
-    """
+    """Custom route class that wraps responses in a MasterResponseModel."""
 
     local_response_model = MasterResponseModel
     local_response_model_field_map = {

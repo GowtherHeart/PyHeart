@@ -13,8 +13,4 @@ class TasksCoreRespModel(
     TasksEntity.date_update,
     TasksEntity.deleted,
 ):
-    """
-    A response model for tasks that combines fields from both the ResponseModel and TasksEntity.
-    This model includes task attributes such as name, content, completion status, creation date,
-    update date, and deletion status.
-    """
+    """Response model for tasks."""
