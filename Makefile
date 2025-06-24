@@ -42,13 +42,10 @@ mypy:
 
 
 ## BUILD IMAGES
-build_base_img:
-	docker build -f contrib/docker/base.Dockerfile -t pyheart-base .
-
 build_app_img:
 	docker build -f contrib/docker/app.Dockerfile -t pyheart-app .
 
-build_pytest_img:
+build_pytest_img: build_app_img
 	docker build -f contrib/docker/pytest.Dockerfile -t pyheart-pytest .
 
 

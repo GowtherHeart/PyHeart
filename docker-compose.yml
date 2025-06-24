@@ -9,7 +9,7 @@ services:
     networks:
       - pyheart-net
     env_file: container.env
-    command: poetry run python main.py -c Http
+    command: uv run python main.py -c Http
     profiles: [app]
     ports:
       - 8001:8001

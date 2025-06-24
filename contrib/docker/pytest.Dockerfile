@@ -1,8 +1,5 @@
-FROM pyheart-base
+FROM pyheart-app
 
-WORKDIR /app
-COPY . /app
-
-RUN poetry install
+RUN uv sync --frozen
 
 CMD ["./contrib/scripts/db.sh"]
