@@ -1,17 +1,12 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI, Request
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from loguru import logger
 from starlette.responses import JSONResponse
 
 from src.config.app import ConfigName, get_config
-from src.controllers.internal.http_v1 import (
-    InternalPostgresSimpleControllerV1,
-    InternalPostgresTransactionControllerV1,
-    InternalPostgresTransactionExcControllerV1,
-)
 from src.controllers.notes.http_v1 import NotesCoreControllerV1
-from src.controllers.tasks.http_v1 import TasksCoreControllerV1
 from src.internal.redis import core_redis
 from src.pkg.abc.cmd import Cmd
 from src.pkg.core.exception import CoreException
@@ -19,9 +14,7 @@ from src.pkg.driver.postgres._main import PostgresDriver
 from src.pkg.driver.query import inject as db_inject
 from src.pkg.fastapi.middleware import MasterMiddelware
 from src.repository import _startup as _startup_repo
-from src.repository import internal as internal_repo
 from src.repository import notes as notes_repo
-from src.repository import tasks as tasks_repo
 
 __all__ = ["HttpCmd"]
 
@@ -74,7 +67,9 @@ class HttpCmd(Cmd):
         swagger_ui_parameters={
             "defaultModelsExpandDepth": -1,
             "syntaxHighlight": {"theme": "tomorrow-night"},
-        }
+        },
+        docs_url=None,  # Disable default docs
+        redoc_url=None,  # Disable redoc
     )
 
     def custom_openapi(self):
@@ -108,8 +103,6 @@ class HttpCmd(Cmd):
         )
         db_inject(_startup_repo, driver)
         db_inject(notes_repo, driver)
-        db_inject(tasks_repo, driver)
-        db_inject(internal_repo, driver)
 
     def __reg_controller_v1(self) -> None:
         router_v1 = APIRouter(prefix="/v1")
@@ -117,24 +110,23 @@ class HttpCmd(Cmd):
         notes_controller = NotesCoreControllerV1()
         router_v1.include_router(router=notes_controller.router)
 
-        tasks_controller = TasksCoreControllerV1()
-        router_v1.include_router(router=tasks_controller.router)
-
-        router_internal = APIRouter(prefix="/_internal")
-
-        internal_pg_simple_router = InternalPostgresSimpleControllerV1()
-        router_internal.include_router(router=internal_pg_simple_router.router)
-
-        internal_pg_transaction_router = InternalPostgresTransactionControllerV1()
-        router_internal.include_router(router=internal_pg_transaction_router.router)
-
-        internal_pg_transaction_exc_router = (
-            InternalPostgresTransactionExcControllerV1()
-        )
-        router_internal.include_router(router=internal_pg_transaction_exc_router.router)
-
         self._app.include_router(router=router_v1)
-        self._app.include_router(router=router_internal)
+
+        # Add custom dark theme docs endpoint
+        @self._app.get("/docs", include_in_schema=False)
+        async def custom_swagger_ui_html():
+            return get_swagger_ui_html(
+                openapi_url="/openapi.json",
+                title="PyHeart - Swagger UI",
+                swagger_ui_parameters={
+                    "defaultModelsExpandDepth": -1,
+                    "syntaxHighlight": {"theme": "tomorrow-night"},
+                    "tryItOutEnabled": True,
+                    "docExpansion": "none",
+                    "displayRequestDuration": True,
+                    "filter": True,
+                },
+            )
 
     @staticmethod
     @_app.exception_handler(CoreException)
