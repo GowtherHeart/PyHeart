@@ -210,7 +210,7 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._map:
-            cls._map[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._map[cls] = super().__call__(*args, **kwargs)
 
         return cls._map[cls]
 
@@ -255,11 +255,11 @@ class Config(metaclass=Singleton):
 
     def __init__(self, settings: list) -> None:
         for el in settings:
-            var = MAP.get(el, None)
+            var = MAP.get(el)
             if var is None:
                 continue
 
-            setattr(self, el, var())
+            setattr(self, el, var())  # type: ignore
 
 
 def arg_parser() -> argparse.Namespace:
@@ -292,7 +292,7 @@ def arg_parser() -> argparse.Namespace:
     return args
 
 
-@lru_cache()
+@lru_cache
 def get_config() -> Config:
     """Get the singleton configuration instance with caching.
 

@@ -1,8 +1,8 @@
 import argparse
 import functools
 import types
+from collections.abc import Sequence
 from enum import Enum
-from typing import Sequence
 
 from fastapi import APIRouter, Response, params
 from fastapi.responses import JSONResponse
@@ -16,7 +16,7 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._map:
-            cls._map[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._map[cls] = super().__call__(*args, **kwargs)
 
         return cls._map[cls]
 
@@ -27,21 +27,18 @@ class Controller:
     name: str = NotImplemented
 
 
-class EndpointException(Exception):
+class EndpointError(Exception):
     """Exception raised when an HTTP endpoint is not implemented."""
 
-    ...
 
-
-class DocsInitException(Exception):
+class DocsInitError(Exception):
     """Exception raised during API documentation initialization."""
-
-    ...
 
 
 def router(
     path: str,
     status_code: int,
+    *,
     tags: Sequence[str] | None = None,
     description: str | None = None,
     response_description: str | None = None,
@@ -107,7 +104,7 @@ class HttpController(Controller, metaclass=Singleton):
             for k, v in self.route_class.local_response_model_field_map.items():  # type: ignore
                 _v = data.get(v, None)
                 if _v is None:
-                    raise DocsInitException()
+                    raise DocsInitError
 
                 field_map[k] = _v
 
@@ -164,19 +161,19 @@ class HttpController(Controller, metaclass=Singleton):
             self.__build(method="patch")
 
     async def get(self):
-        raise EndpointException()
+        raise EndpointError
 
     async def post(self):
-        raise EndpointException()
+        raise EndpointError
 
     async def delete(self):
-        raise EndpointException()
+        raise EndpointError
 
     async def put(self):
-        raise EndpointException()
+        raise EndpointError
 
     async def patch(self):
-        raise EndpointException()
+        raise EndpointError
 
 
 class CliController(Controller, metaclass=Singleton):
@@ -196,4 +193,4 @@ class CliController(Controller, metaclass=Singleton):
 
     async def execute(self) -> None:
         """Execute the CLI command logic."""
-        raise NotImplementedError()
+        raise NotImplementedError

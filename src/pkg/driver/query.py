@@ -1,5 +1,6 @@
 import inspect
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from loguru import logger
 
@@ -7,8 +8,7 @@ from src.pkg.driver.postgres import PostgresDriver
 
 
 class Query:
-    """
-    Base class for executing database queries using a specified driver.
+    """Base class for executing database queries using a specified driver.
 
     This class provides a framework for executing queries with parameters and handling
     exceptions. It supports both single and array results, and allows for custom exception
@@ -40,8 +40,7 @@ class Query:
     default_exception: type[Exception] | None = None
 
     def __init__(self, *args) -> None:
-        """
-        Initialize the query with parameters.
+        """Initialize the query with parameters.
 
         Args:
             *args: Variable arguments to be used as query parameters.
@@ -49,8 +48,7 @@ class Query:
         self.param = args
 
     async def _execute(self) -> Any:
-        """
-        Abstract method for executing the database query.
+        """Abstract method for executing the database query.
 
         This method must be implemented by subclasses to define the specific
         execution strategy (e.g., with or without transactions).
@@ -61,11 +59,10 @@ class Query:
         Raises:
             NotImplementedError: If not implemented by subclass.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def execute(self) -> Any:
-        """
-        Execute the query with exception handling and result transformation.
+        """Execute the query with exception handling and result transformation.
 
         This method orchestrates the query execution process:
         1. Calls the abstract _execute() method
@@ -115,8 +112,7 @@ class Query:
 
 
 class QueryExecute(Query):
-    """
-    Query executor that runs queries without transaction context.
+    """Query executor that runs queries without transaction context.
 
     This class executes queries using the driver's force_select method,
     which bypasses any existing transaction context and acquires a fresh
@@ -137,8 +133,7 @@ class QueryExecute(Query):
     """
 
     async def _execute(self) -> Any:
-        """
-        Execute query using force_select (non-transactional).
+        """Execute query using force_select (non-transactional).
 
         Returns:
             Any: Raw query results from the PostgreSQL driver.
@@ -147,8 +142,7 @@ class QueryExecute(Query):
 
 
 class QueryTxExecute(Query):
-    """
-    Query executor that runs queries within transaction context.
+    """Query executor that runs queries within transaction context.
 
     This class executes queries using the driver's transaction_select method,
     which either uses an existing transaction connection (if available) or
@@ -169,8 +163,7 @@ class QueryTxExecute(Query):
     """
 
     async def _execute(self) -> Any:
-        """
-        Execute query using transaction_select (transactional).
+        """Execute query using transaction_select (transactional).
 
         Returns:
             Any: Raw query results from the PostgreSQL driver.
@@ -179,8 +172,7 @@ class QueryTxExecute(Query):
 
 
 def inject(module, driver) -> None:
-    """
-    Injects a driver into Query subclasses within a given module.
+    """Injects a driver into Query subclasses within a given module.
 
     This function iterates over all classes in the provided module, identifies
     subclasses of the Query class, and sets their model, driver, and array attributes
@@ -193,10 +185,8 @@ def inject(module, driver) -> None:
     class_array = {
         name: cls for name, cls in vars(module).items() if inspect.isclass(cls)
     }
-    result = []
-    for _, v in class_array.items():
-        if issubclass(v.__bases__[0], Query):
-            result.append(v)
+    result: list[Any] = []
+    result.extend(v for v in class_array.values() if issubclass(v.__bases__[0], Query))
 
     logger.info(f"inject query: {result}")
     for obj in result:

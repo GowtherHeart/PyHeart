@@ -35,10 +35,3 @@ async def note():
     from src.repository import notes as notes_repo
 
     return await notes_repo.CreateQuery(name=uuid4().hex, content=uuid4().hex).execute()
-
-
-@pytest.fixture
-async def task():
-    from src.repository import tasks as task_repo
-
-    return await task_repo.CreateQuery(name=uuid4().hex, content=uuid4().hex).execute()

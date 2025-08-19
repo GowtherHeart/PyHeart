@@ -4,8 +4,7 @@ __all__ = ["InitConnectionQuery"]
 
 
 class InitConnectionQuery(QueryExecute):
-    """
-    This class is responsible for initializing a connection by executing a simple query.
+    """This class is responsible for initializing a connection by executing a simple query.
     It inherits from QueryForceSelect and overrides the execute method to perform the query.
     """
 

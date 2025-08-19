@@ -1,6 +1,7 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from functools import wraps
-from typing import Any, AsyncGenerator
+from typing import Any
 
 from loguru import logger
 
@@ -10,8 +11,7 @@ from src.pkg.driver.postgres import PostgresDriver
 
 
 def transaction(func):
-    """
-    A decorator that wraps a function to provide a transactional context using a PostgreSQL database connection.
+    """A decorator that wraps a function to provide a transactional context using a PostgreSQL database connection.
     It checks if a connection already exists for the current transaction ID. If not, it initializes a new connection pool,
     acquires a connection, and starts a transaction. The wrapped function is then executed within this transactional context.
     After the function execution, the connection is removed from the transaction context.
@@ -38,13 +38,12 @@ def transaction(func):
 
         await driver._init_pool()
         try:
-            async with driver.pool.acquire() as conn:
-                async with conn.transaction():
-                    logger.debug(f"[tx_decorator] start transaction")
-                    driver.conn[get_tx_id()] = conn
-                    return await func(*args, **kwargs)
+            async with driver.pool.acquire() as conn, conn.transaction():
+                logger.debug("[tx_decorator] start transaction")
+                driver.conn[get_tx_id()] = conn
+                return await func(*args, **kwargs)
         finally:
-            logger.debug(f"[tx_decorator] remove transaction")
+            logger.debug("[tx_decorator] remove transaction")
             if driver.conn.get(get_tx_id()) is not None:
                 del driver.conn[get_tx_id()]
 
@@ -52,9 +51,8 @@ def transaction(func):
 
 
 @asynccontextmanager
-async def tx() -> AsyncGenerator[Any, None]:
-    """
-    An asynchronous context manager that provides a transactional connection to the PostgreSQL database.
+async def tx() -> AsyncGenerator[Any]:
+    """An asynchronous context manager that provides a transactional connection to the PostgreSQL database.
     It checks if a connection already exists for the current transaction ID. If not, it initializes a new connection pool,
     acquires a connection, and starts a transaction. The connection is yielded for use within the context block.
     After the block is executed, the connection is removed from the transaction context.
@@ -76,13 +74,12 @@ async def tx() -> AsyncGenerator[Any, None]:
     else:
         await driver._init_pool()
         try:
-            async with driver.pool.acquire() as conn:
-                async with conn.transaction():
-                    logger.debug(f"[tx_contextmanager] start transaction")
-                    driver.conn[get_tx_id()] = conn
-                    yield conn
+            async with driver.pool.acquire() as conn, conn.transaction():
+                logger.debug("[tx_contextmanager] start transaction")
+                driver.conn[get_tx_id()] = conn
+                yield conn
 
         finally:
-            logger.debug(f"[tx_contextmanager] remove transaction")
+            logger.debug("[tx_contextmanager] remove transaction")
             if driver.conn.get(get_tx_id()) is not None:
                 del driver.conn[get_tx_id()]

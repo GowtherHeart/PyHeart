@@ -9,7 +9,7 @@ class Cmd:
 
     def run(self) -> None:
         """Execute the command's main functionality."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class Mapper:

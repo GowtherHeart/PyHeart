@@ -2,7 +2,7 @@ from src.entity.db.core import CoreEntity
 from src.entity.db.notes import NotesCustomEntity, NotesEntity
 from src.pkg.abc.model import ParamsModel, PayloadModel
 
-__all__ = ["CreatePldModel", "UpdatePldModel", "GetPrmModel"]
+__all__ = ["CreatePldModel", "GetPrmModel", "UpdatePldModel"]
 
 
 class GetPrmModel(

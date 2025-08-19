@@ -1,7 +1,8 @@
 import hashlib
 from abc import abstractmethod
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, List, Self
+from typing import Any, Self
 
 import asyncpg  # type: ignore
 
@@ -11,8 +12,7 @@ __all__ = ["PostgresDriver"]
 
 
 class Cursor:
-    """
-    Abstract base class for database cursor operations.
+    """Abstract base class for database cursor operations.
 
     Provides interface for navigating and fetching data from query results
     in a cursor-based manner. Implementations should provide efficient
@@ -28,9 +28,8 @@ class Cursor:
     """
 
     @abstractmethod
-    async def fetchrow(self) -> Dict[Any, Any]:
-        """
-        Fetch the next row from the cursor.
+    async def fetchrow(self) -> dict[Any, Any]:
+        """Fetch the next row from the cursor.
 
         Returns:
             Dict[Any, Any]: A dictionary representing the next row,
@@ -39,9 +38,8 @@ class Cursor:
         ...
 
     @abstractmethod
-    async def fetch(self, value: int) -> List[Dict[Any, Any]]:
-        """
-        Fetch multiple rows from the cursor.
+    async def fetch(self, value: int) -> list[dict[Any, Any]]:
+        """Fetch multiple rows from the cursor.
 
         Args:
             value (int): Number of rows to fetch.
@@ -53,8 +51,7 @@ class Cursor:
 
     @abstractmethod
     async def forward(self, value: int) -> None:
-        """
-        Move the cursor forward by the specified number of rows.
+        """Move the cursor forward by the specified number of rows.
 
         Args:
             value (int): Number of rows to skip forward.
@@ -63,8 +60,7 @@ class Cursor:
 
 
 class Connector:
-    """
-    Abstract base class for database connection operations.
+    """Abstract base class for database connection operations.
 
     Provides interface for executing queries, managing transactions, and
     handling database connections. Implementations should provide methods
@@ -80,9 +76,8 @@ class Connector:
 
     @abstractmethod  # type: ignore
     @asynccontextmanager  # type: ignore
-    async def transaction(self) -> AsyncGenerator[Self, None]:
-        """
-        Create a database transaction context manager.
+    async def transaction(self) -> AsyncGenerator[Self]:
+        """Create a database transaction context manager.
 
         Yields:
             AsyncGenerator[Self, None]: A transaction-enabled connector instance.
@@ -97,8 +92,7 @@ class Connector:
 
     @abstractmethod
     async def cursor(self, query: str, *args: Any) -> Cursor:
-        """
-        Create a cursor for the given query.
+        """Create a cursor for the given query.
 
         Args:
             query (str): SQL query to execute.
@@ -111,8 +105,7 @@ class Connector:
 
     @abstractmethod
     async def execute(self, query: str, *args: Any) -> None:
-        """
-        Execute a query without returning results.
+        """Execute a query without returning results.
 
         Used for INSERT, UPDATE, DELETE operations.
 
@@ -124,8 +117,7 @@ class Connector:
 
     @abstractmethod
     async def executemany(self, query: str, *args: Any) -> None:
-        """
-        Execute a query multiple times with different parameter sets.
+        """Execute a query multiple times with different parameter sets.
 
         Efficient for bulk operations like batch inserts.
 
@@ -136,9 +128,8 @@ class Connector:
         ...
 
     @abstractmethod
-    async def fetchrow(self, query: str, *args: Any) -> Dict[Any, Any]:
-        """
-        Execute a query and fetch a single row.
+    async def fetchrow(self, query: str, *args: Any) -> dict[Any, Any]:
+        """Execute a query and fetch a single row.
 
         Args:
             query (str): SQL query to execute.
@@ -150,9 +141,8 @@ class Connector:
         ...
 
     @abstractmethod
-    async def fetchval(self, query: str, *args: Any) -> Dict[Any, Any]:
-        """
-        Execute a query and fetch a single value.
+    async def fetchval(self, query: str, *args: Any) -> dict[Any, Any]:
+        """Execute a query and fetch a single value.
 
         Args:
             query (str): SQL query to execute.
@@ -164,9 +154,8 @@ class Connector:
         ...
 
     @abstractmethod
-    async def fetch(self, query: str, *args: Any) -> List[Dict[Any, Any]]:
-        """
-        Execute a query and fetch all results.
+    async def fetch(self, query: str, *args: Any) -> list[dict[Any, Any]]:
+        """Execute a query and fetch all results.
 
         Args:
             query (str): SQL query to execute.
@@ -179,8 +168,7 @@ class Connector:
 
 
 class _Singleton(type):
-    """
-    A metaclass for creating singleton classes with parameter-based instantiation.
+    """A metaclass for creating singleton classes with parameter-based instantiation.
 
     Unlike the traditional singleton pattern, this implementation allows for multiple
     instances of a class, each associated with a unique set of initialization parameters.
@@ -195,11 +183,9 @@ class _Singleton(type):
     _inst_map: dict = {}
 
     def _merge_param(cls, *args, **kwargs) -> str:
-        result = []
-        for v in args:
-            result.append(str(v))
-        for _, v in kwargs.items():
-            result.append(str(v))
+        result: list[Any] = []
+        result.extend(str(v) for v in args)
+        result.extend(str(v) for v in kwargs.values())
 
         m = hashlib.sha256()
         m.update("".join(result).encode("utf-8"))
@@ -208,14 +194,13 @@ class _Singleton(type):
     def __call__(cls, *args, **kwargs):
         param_hex = cls._merge_param(*args, **kwargs)
         if param_hex not in cls._inst_map:
-            cls._inst_map[param_hex] = super(_Singleton, cls).__call__(*args, **kwargs)
+            cls._inst_map[param_hex] = super().__call__(*args, **kwargs)
 
         return cls._inst_map[param_hex]
 
 
 class PostgresDriver(metaclass=_Singleton):
-    """
-    A singleton class that manages a connection pool to a PostgreSQL database using asyncpg.
+    """A singleton class that manages a connection pool to a PostgreSQL database using asyncpg.
 
     This class provides methods to execute queries and transactions asynchronously. It ensures
     that only one instance of the connection pool is created for a given set of connection parameters.
@@ -264,14 +249,13 @@ class PostgresDriver(metaclass=_Singleton):
         self.max_inactive_connection_lifetime = max_inactive_connection_lifetime
 
     async def _init_pool(self) -> None:
-        """
-        Initialize the PostgreSQL connection pool if not already created.
+        """Initialize the PostgreSQL connection pool if not already created.
 
         Creates an asyncpg connection pool with the configured parameters.
         This method is idempotent - subsequent calls will not recreate the pool.
         """
         if self.pool is None:
-            self.pool = await asyncpg.create_pool(
+            self.pool = await asyncpg.create_pool(  # type: ignore
                 database=self.db,
                 user=self._username,
                 port=self._port,
@@ -283,8 +267,7 @@ class PostgresDriver(metaclass=_Singleton):
             )
 
     async def force_select(self, query: str, *args) -> Any:
-        """
-        Execute a SELECT query without transaction context.
+        """Execute a SELECT query without transaction context.
 
         Acquires a connection from the pool, executes the query, and returns results.
         This method bypasses any existing transaction context.
@@ -308,8 +291,7 @@ class PostgresDriver(metaclass=_Singleton):
             return await conn.fetch(query, *args)
 
     async def transaction_select(self, query, *args) -> Any:
-        """
-        Execute a SELECT query within transaction context.
+        """Execute a SELECT query within transaction context.
 
         If a transaction is already active (identified by transaction ID),
         uses the existing connection. Otherwise, creates a new transaction.
@@ -329,13 +311,11 @@ class PostgresDriver(metaclass=_Singleton):
             return await self.conn[get_tx_id()].fetch(query, *args)
 
         await self._init_pool()
-        async with self.pool.acquire() as conn:
-            async with conn.transaction():
-                return await conn.fetch(query, *args)
+        async with self.pool.acquire() as conn, conn.transaction():
+            return await conn.fetch(query, *args)
 
     async def force_execute(self, query: str, *args) -> None:
-        """
-        Execute a query without returning results, bypassing transaction context.
+        """Execute a query without returning results, bypassing transaction context.
 
         Used for INSERT, UPDATE, DELETE operations that don't need to return data.
         Acquires a fresh connection from the pool for execution.
@@ -357,8 +337,7 @@ class PostgresDriver(metaclass=_Singleton):
             await conn.execute(query, *args)
 
     async def transaction_execute(self, query, *args) -> None:
-        """
-        Execute a query within transaction context without returning results.
+        """Execute a query within transaction context without returning results.
 
         If a transaction is already active, uses the existing connection.
         Otherwise, creates a new transaction for the operation.
@@ -376,6 +355,5 @@ class PostgresDriver(metaclass=_Singleton):
             return await self.conn[get_tx_id()].fetch(query, *args)
 
         await self._init_pool()
-        async with self.pool.acquire() as conn:
-            async with conn.transaction():
-                return await conn.execute(query, *args)
+        async with self.pool.acquire() as conn, conn.transaction():
+            return await conn.execute(query, *args)

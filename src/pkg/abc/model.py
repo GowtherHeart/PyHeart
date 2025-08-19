@@ -19,5 +19,3 @@ class ResponseModel(BaseModel):
 
 class Model(BaseModel):
     """Generic base Pydantic model for general-purpose data structures."""
-
-    ...

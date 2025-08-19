@@ -1,5 +1,5 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from httpx import ASGITransport, AsyncClient
 
@@ -9,6 +9,9 @@ __all__ = ["get_client"]
 
 
 @asynccontextmanager
-async def get_client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(transport=ASGITransport(app=HttpApp().app()), base_url="http://testserver") as client:  # type: ignore
+async def get_client() -> AsyncGenerator[AsyncClient]:
+    async with AsyncClient(
+        transport=ASGITransport(app=HttpApp().app()),  # type: ignore
+        base_url="http://testserver",  # type: ignore
+    ) as client:
         yield client

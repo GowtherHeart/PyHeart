@@ -34,8 +34,7 @@ def RequestLogger(
 
 
 class MasterMiddelware(BaseHTTPMiddleware):
-    """
-    MasterMiddleware is a custom middleware for FastAPI applications.
+    """MasterMiddleware is a custom middleware for FastAPI applications.
 
     This middleware is responsible for generating a transaction ID for each request
     by invoking the make_tx_id function. It then proceeds to call the next middleware

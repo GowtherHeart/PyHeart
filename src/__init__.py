@@ -4,7 +4,7 @@ from src.cmd import Mapper
 from src.config.app import Config, arg_parser, get_config
 from src.pkg.logging import LoggingInit
 
-testing = bool(os.getenv("TESTING", False))
+testing = bool(os.getenv("TESTING", default=False))
 if testing is True:
     ...
 else:
@@ -12,7 +12,7 @@ else:
     cmd_arg = arg_map.cmd
 
     if cmd_arg not in Mapper.MAP:
-        raise ValueError()
+        raise ValueError
 
     cmd_obj = Mapper().MAP[cmd_arg]
     Config(cmd_obj.config_array)  # type: ignore

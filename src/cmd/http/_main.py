@@ -13,8 +13,7 @@ from src.pkg.core.exception import CoreException
 from src.pkg.driver.postgres._main import PostgresDriver
 from src.pkg.driver.query import inject as db_inject
 from src.pkg.fastapi.middleware import MasterMiddelware
-from src.repository import _startup as _startup_repo
-from src.repository import notes as notes_repo
+from src.repository import _startup as _startup_repo, notes as notes_repo
 
 __all__ = ["HttpCmd"]
 
@@ -64,10 +63,10 @@ class HttpCmd(Cmd):
     ]
 
     _app = FastAPI(
-        swagger_ui_parameters={
-            "defaultModelsExpandDepth": -1,
-            "syntaxHighlight": {"theme": "tomorrow-night"},
-        },
+        # swagger_ui_parameters={
+        #     "defaultModelsExpandDepth": -1,
+        #     "syntaxHighlight": {"theme": "tomorrow-night"},
+        # },
         docs_url=None,  # Disable default docs
         redoc_url=None,  # Disable redoc
     )
@@ -88,10 +87,10 @@ class HttpCmd(Cmd):
 
     def __init__(self) -> None:
         self._config = get_config()
-        self._app.add_middleware(MasterMiddelware)
+        self._app.add_middleware(MasterMiddelware)  # type: ignore
         self._init_repo()
         self.__reg_controller_v1()
-        setattr(self._app, "openapi", self.custom_openapi)
+        self._app.openapi = self.custom_openapi  # type: ignore
 
     def _init_repo(self) -> None:
         driver = PostgresDriver(
@@ -146,6 +145,7 @@ class HttpCmd(Cmd):
         )
 
     @staticmethod
+    # pyrefly: ignore  # deprecated
     @_app.on_event("startup")
     async def starup():
         with logger.contextualize(request_id="init"):

@@ -5,36 +5,26 @@ files_to_check 	?= src tests main.py
 
 ## Format all
 fmt: format
-format: remove_imports isort black
+format: ruff_format
 
 
 ## Check code quality
 lint: check
-# check: flake8 mypy
-check: mypy
-
-## Remove unused imports
-remove_imports:
-	autoflake -ir --remove-unused-variables \
-		--ignore-init-module-imports \
-		--remove-all-unused-imports \
-		${files_to_fmt}
+check: ruff_check mypy
 
 
-## Sort imports
-isort:
-	isort ${files_to_fmt}
 
+## Run ruff linter
+ruff_check:
+	ruff check ${files_to_check}
 
-## Format code
-black:
-	black ${files_to_fmt}
+## Run ruff formatter
+ruff_format:
+	ruff format ${files_to_fmt}
 
-
-## Check pep8
-flake8:
-	flake8 ${files_to_check}
-
+## Run ruff linter with fixes
+ruff_fix:
+	ruff check --fix ${files_to_check}
 
 ## Check typing
 mypy:

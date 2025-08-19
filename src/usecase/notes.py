@@ -71,7 +71,7 @@ class NotesV1US(Usecase):
             content=payload.content,
         ).execute()
         if len(effect) == 0:
-            raise EmptyResultException()
+            raise EmptyResultException
 
         return effect[0]
 
@@ -101,6 +101,6 @@ class NotesV1US(Usecase):
             deleted=True,
         ).execute()
         if len(effect) == 0:
-            raise EmptyResultException()
+            raise EmptyResultException
 
         return effect[0]

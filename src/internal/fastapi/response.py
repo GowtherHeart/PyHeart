@@ -1,5 +1,6 @@
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from fastapi import BackgroundTasks
 from fastapi.responses import Response
@@ -18,7 +19,6 @@ class MasterResponse(Response):
         media_type: str | None = None,
         background: BackgroundTasks | None = None,
     ) -> None:
-
         self.status_code = status_code
         if media_type is not None:
             self.media_type = media_type

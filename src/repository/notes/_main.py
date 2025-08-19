@@ -6,7 +6,7 @@ from src.internal.exception.notes import NoteCreateException, NoteUpdateExceptio
 from src.models.db.notes import NoteCoreModel
 from src.pkg.driver.query import QueryExecute, QueryTxExecute
 
-__all__ = ["CreateQuery", "UpdateQuery", "SelectQuery"]
+__all__ = ["CreateQuery", "SelectQuery", "UpdateQuery"]
 
 
 class CreateQuery(QueryTxExecute):

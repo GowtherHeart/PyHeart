@@ -3,8 +3,7 @@ from src.pkg.abc.cmd import Cmd
 from src.pkg.context import make_tx_id
 from src.pkg.driver.postgres._main import PostgresDriver
 from src.pkg.driver.query import inject as db_inject
-from src.repository import _startup as _startup_repo
-from src.repository import notes as notes_repo
+from src.repository import _startup as _startup_repo, notes as notes_repo
 
 
 class BaseCliCmd(Cmd):

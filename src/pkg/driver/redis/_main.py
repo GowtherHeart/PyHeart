@@ -1,6 +1,7 @@
 import hashlib
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
+from typing import Any
 
 import redis.asyncio as aioredis
 from loguru import logger
@@ -9,8 +10,7 @@ __all__ = ["RedisDriver"]
 
 
 class _Singleton(type):
-    """
-    A metaclass for creating singleton classes with parameter-based instantiation.
+    """A metaclass for creating singleton classes with parameter-based instantiation.
 
     Unlike the traditional singleton pattern, this implementation allows for multiple
     instances of a class, each associated with a unique set of initialization parameters.
@@ -25,11 +25,9 @@ class _Singleton(type):
     _inst_map: dict = {}
 
     def _merge_param(cls, *args, **kwargs) -> str:
-        result = []
-        for v in args:
-            result.append(str(v))
-        for _, v in kwargs.items():
-            result.append(str(v))
+        result: list[Any] = []
+        result.extend(str(v) for v in args)
+        result.extend(str(v) for v in kwargs.values())
 
         m = hashlib.sha256()
         m.update("".join(result).encode("utf-8"))
@@ -38,14 +36,13 @@ class _Singleton(type):
     def __call__(cls, *args, **kwargs):
         param_hex = cls._merge_param(*args, **kwargs)
         if param_hex not in cls._inst_map:
-            cls._inst_map[param_hex] = super(_Singleton, cls).__call__(*args, **kwargs)
+            cls._inst_map[param_hex] = super().__call__(*args, **kwargs)
 
         return cls._inst_map[param_hex]
 
 
 class RedisDriver(metaclass=_Singleton):
-    """
-    A singleton Redis driver that manages connections to a Redis database using aioredis.
+    """A singleton Redis driver that manages connections to a Redis database using aioredis.
 
     This class provides async methods for basic Redis operations (get, set, delete)
     with connection pooling and automatic connection management. It ensures that only
@@ -71,7 +68,7 @@ class RedisDriver(metaclass=_Singleton):
         ```
     """
 
-    _connector: Optional[aioredis.Redis] = None
+    _connector: aioredis.Redis | None = None
 
     def __init__(
         self,
@@ -82,8 +79,7 @@ class RedisDriver(metaclass=_Singleton):
         db: str,
         max_connection: int = 10,
     ) -> None:
-        """
-        Initialize the Redis driver with connection parameters.
+        """Initialize the Redis driver with connection parameters.
 
         Args:
             host (str): Redis server hostname or IP address.
@@ -103,8 +99,7 @@ class RedisDriver(metaclass=_Singleton):
         )
 
     def __create_dsn(self) -> str:
-        """
-        Create a Redis Data Source Name (DSN) string from connection parameters.
+        """Create a Redis Data Source Name (DSN) string from connection parameters.
 
         Returns:
             str: A properly formatted Redis connection string.
@@ -114,13 +109,12 @@ class RedisDriver(metaclass=_Singleton):
         """
         return (
             f"redis://{self.__username}:{self.__password}"
-            + f"@{self.__host}:{self.__port}/{self.__db}"
+            f"@{self.__host}:{self.__port}/{self.__db}"
         )
 
     @asynccontextmanager
-    async def _create_connector(self) -> AsyncGenerator[aioredis.Redis, None]:
-        """
-        Create and manage a Redis connection context.
+    async def _create_connector(self) -> AsyncGenerator[aioredis.Redis]:
+        """Create and manage a Redis connection context.
 
         Creates a Redis connection from the pool if one doesn't exist,
         yields it for use, and ensures proper cleanup on exit.
@@ -142,9 +136,8 @@ class RedisDriver(metaclass=_Singleton):
         finally:
             await self._connector.close()
 
-    async def set(self, name: str, value: str, expire: Optional[int] = None) -> None:
-        """
-        Set a key-value pair in Redis with optional expiration.
+    async def set(self, name: str, value: str, expire: int | None = None) -> None:
+        """Set a key-value pair in Redis with optional expiration.
 
         Args:
             name (str): The key name to set.
@@ -157,13 +150,11 @@ class RedisDriver(metaclass=_Singleton):
             await driver.set("config", "value")  # No expiration
             ```
         """
-        async with self._create_connector() as redis:
-            async with redis.client() as conn:
-                await conn.set(name=name, value=value, ex=expire)
+        async with self._create_connector() as redis, redis.client() as conn:
+            await conn.set(name=name, value=value, ex=expire)
 
     async def get(self, name: str) -> str:
-        """
-        Retrieve a value from Redis by key.
+        """Retrieve a value from Redis by key.
 
         Args:
             name (str): The key name to retrieve.
@@ -178,13 +169,11 @@ class RedisDriver(metaclass=_Singleton):
                 print(f"User: {value}")
             ```
         """
-        async with self._create_connector() as redis:
-            async with redis.client() as conn:
-                return await conn.get(name=name)
+        async with self._create_connector() as redis, redis.client() as conn:
+            return await conn.get(name=name)
 
     async def delete(self, name: str) -> None:
-        """
-        Delete a key from Redis.
+        """Delete a key from Redis.
 
         Args:
             name (str): The key name to delete.
@@ -194,6 +183,5 @@ class RedisDriver(metaclass=_Singleton):
             await driver.delete("user:123")
             ```
         """
-        async with self._create_connector() as redis:
-            async with redis.client() as conn:
-                await conn.delete(name)
+        async with self._create_connector() as redis, redis.client() as conn:
+            await conn.delete(name)
